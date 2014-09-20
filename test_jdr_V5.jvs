@@ -1,0 +1,1451 @@
+
+// --------------------------------------------- VARIABLE GLOBALE --------------------------------------------- //
+int COU, INT, CHA, AD, FO, EV, EA, PdD, magPhy, magPsy, resMag, AT, PRD, or, nbMet = 13;
+
+String [] ori = new String [nbMet];
+
+String [] met = new String [nbMet];
+
+boolean [] O = new boolean [nbMet];
+
+boolean [] M = new boolean [nbMet];
+
+String [] compS = new String [46];
+
+// [compétence][0: non, 1: oui, 2: plus tard]
+int [] comp = new int [46];
+
+void maj() {
+   boolean b;
+   print("Mise à jour, Nouveauté :\n\n");
+   print("Modification d'affichage");
+   print("Les origine/métier sont désormais résolu !\n");
+   print("\nA venir :\n\n");
+   print("Duplication des restrictions\n");
+   print("Pour plus d'info : ");
+   print("http://www.naheulbeuk.com/index.htm\n");
+   print("\n\tPour tirer votre personnage cliquez sur \"Oui\"\n");
+   while ( ! (b = readBoolean("Pour commencer cliquez sur \"Oui\"")));
+}
+
+// --------------------------------------------- FONCTION --------------------------------------------- //
+ // simulateur de dé... ou pas !
+ int de(int max, boolean d) {
+   if (d) {
+      int a = readInteger(" Lancez un dé " + max + " puis entrez le résultat");
+      while (a > max || a <1) a = readInteger(" veuillez rentrer un nombre compris entre 1 et " + max);
+      return  a;
+   }
+   else return  random(1, max +1);
+}
+
+void initOrigineMetier() {
+   for (int i =0; i < nbMet; i ++) {
+      ori[i] = null;
+      O[i] = false;
+      met[i] = null;
+      M[i] = false;
+   }
+   /* ----------- Origine ----------- */
+    ori[0] = "Barbare";
+   ori[1] = "Demi-Elfe";
+   ori[2] = "Demi-Orque";
+   ori[3] = "Elfe Noir";
+   ori[4] = "Elfe Sylvain";
+   ori[5] = "Gnôme";
+   ori[6] = "Gobelin";
+   ori[7] = "Haut Elfe";
+   ori[8] = "Hobbit";
+   ori[9] = "Humain";
+   ori[10] = "Ogre";
+   ori[11] = "Orque";
+   ori[12] = "Nain";
+   /* ----------- Métier ----------- */
+    met[0] = "Bourgeois ou Noble";
+   met[1] = "Guerrier ou Gladiateur";
+   met[2] = "Ingénieur";
+   met[3] = "Mage";
+   met[4] = "Marchand ou Négociant";
+   met[5] = "Menestrel";
+   met[6] = "Ninja ou Assassin";
+   met[7] = "Paladin";
+   met[8] = "Pirate";
+   met[9] = "Prêtre";
+   met[10] = "Ranger";
+   met[11] = "Tzinntch";
+   met[12] = "Voleur";
+}
+
+/* Définition des Origines possible */
+ void origine() {
+   /*Barbare*/
+    O[0] = (COU > 11) && (INT < 11) && (FO > 12);
+   /*Demi-Elfe*/
+    O[1] = (CHA > 9) && (AD > 10);
+   /*Demi-Orque*/
+    O[2] = (INT < 11) && (AD < 12) && (FO > 11);
+   /*Elfe Noir*/
+    O[3] = (INT > 11) && (AD > 12) && (FO < 13);
+   /*Elfe Sylvain*/
+    O[4] = (CHA > 11) && (AD > 9) && (FO < 12);
+   /*Gnôme*/
+    O[5] = (INT > 9) && (AD > 12) && (FO < 9);
+   /*Gobelin*/
+    O[6] = (COU < 11) && (INT < 11) && (CHA < 9) && (FO < 10);
+   /*Haut Elfe*/
+    O[7] = (INT > 10) && (CHA > 11) && (AD > 11) && (FO < 13);
+   /*Hobbit*/
+    O[8] = (COU > 11) && (INT > 9) && (FO < 11);
+   /*Humain*/
+    O[9] = true;
+   /*Ogre*/
+    O[10] = (COU > 10) && (FO > 11);
+   /*Orque*/
+    O[11] = (INT < 10) && (CHA < 11) && (AD < 12) && (FO > 12);
+   /*Nain*/
+    O[12] = (INT < 9) && (CHA < 11) && (FO > 11);
+}
+
+/* Definition des métier */
+ void metier() {
+   /*Bourgeois ou Noble*/
+    M[0] = (INT >9) && (CHA >10);
+   /*Guerrier ou gladiateur*/
+    M[1] = (COU >11) && (FO >11);
+   /*Ingénieur*/
+    M[2] = (AD >10);
+   /*Mage*/
+    M[3] = (INT >11);
+   /*Marchand ou Négociant*/
+    M[4] = (INT >11) && (CHA >10);
+   /*Menestrel*/
+    M[5] = (CHA >11) && (AD >10);
+   /*Ninja ou Assassin*/
+    M[6] = (AD >12);
+   /*Paladin*/
+    M[7] = (COU >11) && (INT >9) && (CHA >10) && (FO >8);
+   /*Pirate*/
+    M[8] = (COU >10);
+   /*Prêtre*/
+    M[9] = (CHA >9);
+   /*Ranger*/
+    M[10] = (CHA >9) && (AD >9);
+   /*Tzinntch*/
+    M[11] = true;
+   /*Voleur*/
+    M[12] = (AD >11);
+}
+
+String ChoixO(boolean d) {
+   /* -------------------------- Choix de l'origine -------------------------- */
+    int l =0, c =0;
+   for (int i =0; i < nbMet; i ++) if (O[i]) {
+      l ++;
+      c = i;
+   }
+   if (l >1) {
+      do{
+         c = readInteger("Entrer le nombre en face de l'origine que vous voulez choisir") -1;
+      }
+      while ((c <0 || c > nbMet) || (O[c] == false));
+      for (int a =0; a < nbMet; a ++) O[a] = false;
+      O[c] = true;
+   }
+   /*Barbare*/
+    if (O[0]) {
+      EV =35;
+      AT ++;
+      PRD --;
+   }
+   else/*Demi-Elfe*/
+    if (O[1]) EV =28;
+   else /*Demi-Orque*/
+    if (O[2]) EV =35;
+   else /*Elfe Noire*/
+    if (O[3]) EV =25;
+   else/*Elfe Sylvain*/
+    if (O[4]) EV =25;
+   else /*Gnôme*/
+    if (O[5]) {
+      EV =15;
+      AT +=2;
+      PRD -=2;
+   }
+   else /*Gobelin*/
+    if (O[6]) EV =20;
+   else/*Haut Elfe*/
+    if (O[7]) EV = 25;
+   else /*Hobbit*/
+    if (O[8]) EV =25;
+   else /*Humain*/
+    if (O[9]) EV =30;
+   else /*Ogre*/
+    if (O[10]) {
+      EV =45;
+      AT ++;
+      PRD --;
+   }
+   else /*Orque*/
+    if (O[11]) {
+      EV =35;
+      AT ++;
+      PRD --;
+   }
+   else /*Nain*/
+    if (O[12]) EV =35;
+   /*Modif  métier en fonction de l'origine*/
+    if (O[0] || O[12] || O[2]) {
+      M[3] = false;
+      M[9] = false;
+   }
+   if (O[4]) {
+      M[1] = false;
+      M[3] = false;
+   }
+   if (O[11] || O[10]) {
+      M[1] = false;
+      M[3] = false;
+      M[7] = false;
+      M[9] = false;
+   }
+   if (O[6]) {
+      M[1] = false;
+      M[3] = false;
+      M[7] = false;
+      M[9] = false;
+   }
+   if (O[8]) {
+      M[3] = false;
+      M[1] = false;
+   }
+   if (O[5]) {
+      M[1] = false;
+      M[3] = false;
+      M[7] = false;
+      M[9] = false;
+   }
+   return  ori[c];
+}
+
+String ChoixM(boolean d) {
+   /* -------------------------- Choix du métier -------------------------- */
+    int k =0, c =0;
+   for (int i = 0; i < nbMet; i ++) if (M[i]) {
+      k ++;
+      c = i;
+   }
+   if (k >1) {
+      do{
+         c = readInteger("Entrer le nombre en face du métier que vous voulez choisir") -1;
+      }
+      while ((c <0 || c > nbMet) || (M[c] == false));
+      for (int a =0; a < nbMet; a ++) M[a] = false;
+      M[c] = true;
+   }
+   /*Bouregois ou Noble*/
+    if (M[0]) {
+      AT =7;
+      PRD =9;
+      or += (de(6, d) + de(6, d)) *10;
+   }
+   else /*Mage*/
+    if (M[3]) {
+      if (O[9]) EV =20;
+      else EV = EV * (1 -1 /3);
+      EA =30;
+   }
+   else /*Ninja ou Assassin*/
+    if (M[6]) {
+      AT =11;
+      PRD =8;
+   }
+   else /*Paladin*/
+    if (M[7]) {
+      EV +=2;
+      EA =10;
+   }
+   else /*Prêtre*/
+    if (M[9]) EA =20;
+   else /*Tzinntch*/
+    if (M[11]) {
+      EV +=2;
+      EA =10;
+   }
+   return  met[c];
+}
+
+void initComp() {
+   for (int i =0; i <46; i ++) {
+      comp[i] =0;
+      compS[i] = null;
+   }
+   compS[0] = "Ambidextrie";
+   compS[1] = "Agoraphobie";
+   compS[2] = "Appel des renforts";
+   compS[3] = "Appel du sauvage";
+   compS[4] = "Appel du tonneau";
+   compS[5] = "Appel du ventre";
+   compS[6] = "Armes de bourrin";
+   compS[7] = "Arnaque et carambouille";
+   compS[8] = "Attire les monstres";
+   compS[9] = "Bourre-pif ";
+   compS[10] = "Bricolo du dimanche";
+   compS[11] = "Chance du rempailleur";
+   compS[12] = "Chercher des noises";
+   compS[13] = "Chevaucher";
+   compS[14] = "Chouraver";
+   compS[15] = "Comprendre les animaux";
+   compS[16] = "Cuistot";
+   compS[17] = "Déplacement silencieux";
+   compS[18] = "Désamorcer";
+   compS[19] = "Escalader";
+   compS[20] = "Forgeron";
+   compS[21] = "Frapper lachement";
+   compS[22] = "Fariboles";
+   compS[23] = "Fouiller dans les poubelles";
+   compS[24] = "Instinct de survie";
+   compS[25] = "Instinct du trésor";
+   compS[26] = "Intimider";
+   compS[27] = "Jonglage et danse";
+   compS[28] = "Langues des monstres";
+   compS[29] = "Méfiance";
+   compS[30] = "Mendier et pleurnicher";
+   compS[31] = "Nager";
+   compS[32] = "Naïveté touchante";
+   compS[33] = "Pénible";
+   compS[34] = "Pister";
+   compS[35] = "Premiers soins";
+   compS[36] = "Radin";
+   compS[37] = "Récupération";
+   compS[38] = "Ressemble à rien";
+   compS[39] = "Runes bizarres";
+   compS[40] = "Sentir des pieds";
+   compS[41] = "Serrurier";
+   compS[42] = "Tête vide";
+   compS[43] = "Tirer correctement";
+   compS[44] = "Tomber dans les pièges";
+   compS[45] = "Truc de mauviette";
+}
+
+void competence() {
+   /* --------------------------- Compétence origine --------------------------- */
+    // Barbare
+    if (O[0]) {
+      comp[0] =1;
+      // Abidextrie
+       comp[12] =1;
+      // Chercher des noises
+       comp[40] =1;
+      // Sentir des pieds
+       comp[42] =1;
+      // Tête vide
+       comp[6] =2;
+      // Armes de bourrin
+       comp[9] =2;
+      /* Bourre-pif */
+       comp[13] =2;
+      // Chevaucher
+       comp[19] =2;
+      // Escalader
+       comp[26] =2;
+      // Intimider
+       comp[31] =2;
+      // Nager
+       comp[34] =2;
+      // Pister
+       comp[43] =2;
+      // Tirer des correctement
+       comp[45] =2;
+      // Truc de mauviette
+    }
+   else // Demi-Elfe
+    if (O[1]) {
+      comp[2] =1;
+      // Appel des renforts
+       comp[14] =1;
+      // Chouraver
+       comp[29] =1;
+      // Méfiance
+       comp[10] =2;
+      // Bricolo du dimanche
+       comp[13] =2;
+      // Chevaucher
+       comp[19] =2;
+      // Escalader
+       comp[23] =2;
+      // Fouiller dans les poubelles
+       comp[30] =2;
+      // Mendier et pleurnicher
+       comp[31] =2;
+      // Nager
+       comp[43] =2;
+      // Tirer correctement
+    }
+   else // Demi-Orque
+    if (O[2]) {
+      comp[1] =1;
+      // Agoraphobie
+       comp[12] =1;
+      // Chercher des noises
+       comp[24] =1;
+      //Instinc de survie
+       comp[40] =1;
+      // Sentir des pieds
+       comp[42] =1;
+      // Tête vide
+       comp[6] =2;
+      // Armes de bourrin
+       comp[9] =2;
+      /* Bourre-pif */
+       comp[23] =2;
+      // Fouiller dans les poubelles
+       comp[19] =2;
+      // Escalader
+       comp[26] =2;
+      // Intimider
+       comp[31] =2;
+      // Nager
+       comp[43] =1;
+      // Tirrer correctement
+       comp[45] =2;
+      // Truc de mauviette
+    }
+   else // Elfe Noir
+    if (O[3]) {
+      comp[1] =1;
+      // Agoraphobie
+       comp[17] =1;
+      // Dléplacement silencieux
+       comp[43] =1;
+      // Tirrer correctement
+       comp[0] =2;
+      // Ambidextrie
+       comp[14] =2;
+      // Chouraver
+       comp[19] =2;
+      // Escalader
+       comp[20] =2;
+      // Forgeron
+       comp[21] = 2;
+      // Frapper lachement
+       comp[29] =2;
+      // Méfiance
+       comp[34] =2;
+      // Pister
+       comp[39] =2;
+      // Runes bizarres
+    }
+   else // Elfe Sylvain
+    if (O[4]) {
+      comp[13] =1;
+      // Chevaucher
+       comp[32] =1;
+      // Naïveté touchante
+       comp[35] =1;
+      // Premers soins
+       comp[43] =1;
+      // Tirrer correctement
+       comp[44] =1;
+      // Tomber dans les pièges
+       comp[15] =2;
+      // Comprendre les animaux
+       comp[17] =2;
+      // Déplacement silencieux
+       comp[27] =2;
+      // Jonglage et dance
+       comp[31] =2;
+      // Nager
+       comp[34] =2;
+      // Pister
+       comp[42] =2;
+      // Tête vide
+    }
+   else // Gnôme
+    if (O[5]) {
+      comp[0] =1;
+      // Ambidextrie
+       comp[2] =1;
+      // Appel des renforts
+       comp[13] =1;
+      // Chevaucher
+       comp[14] =1;
+      // Chouraver
+       comp[17] =1;
+      // Déplacement silencieux
+       comp[25] =1;
+      // Instinct du trésor
+       comp[15] =2;
+      // Comprendre les animaux
+       comp[18] =2;
+      // Désamorcer
+       comp[19] =2;
+      // Escalader
+       comp[27] =2;
+      // Jonglage et danse
+       comp[30] =2;
+      // Mendier et pleurnicher
+       comp[31] =2;
+      // Nager
+       comp[41] =2;
+      // Serrurier
+    }
+   else // Gobelin
+    if (O[6]) {
+      comp[1] =1;
+      // Agoraphobie
+       comp[3] =1;
+      // Appel du sauvage
+       comp[8] =1;
+      // Attire les monstres
+       comp[40] =1;
+      // Sentir des pieds
+       comp[24] =1;
+      // Instinct de survie
+       comp[25] =1;
+      // Instinct du trésor
+       comp[2] =1;
+      // Appel des renforts
+       comp[42] =1;
+      // Tête vide
+       comp[10] =2;
+      // Bricolo du dimanche
+       comp[18] =2;
+      // Désarmorcer
+       comp[19] =2;
+      // Escalader
+       comp[20] =2;
+      // Forgeron
+    }
+   else // Haut Elfe
+    if (O[7]) {
+      comp[39] =1;
+      // Runes bizarres
+       comp[44] =1;
+      // Tomber dans les pièges
+       comp[13] =2;
+      // Chevaucher
+       comp[27] =2;
+      // Jonglage et danse
+       comp[31] =2;
+      // Nager
+       comp[35] =2;
+      // Premmiers soins
+       comp[43] =2;
+      // Tirrer correctement
+    }
+   else // Hobbit
+    if (O[8]) {
+      comp[4] =1;
+      // Appel du tonneau
+       comp[8] =1;
+      // Attire les monstres
+       comp[16] =1;
+      // Cuistot
+       comp[24] =1;
+      // Instinct de survie
+       comp[38] =1;
+      // Ressemble à rien
+       comp[2] =2;
+      // Appel des renforts
+       comp[10] =2;
+      // Bricolo du dimanche
+       comp[14] =2;
+      // Chouraver
+       comp[21] =2;
+      // Frapper lachement
+       comp[22] =2;
+      // Fariboles
+       comp[23] =2;
+      // Fouiller dans les poubelles
+       comp[25] =2;
+      // Instinc du trésor
+       comp[30] =2;
+      // Mendier et pleurnicher
+       comp[43] =2;
+      // Tirer correctement
+    }
+   else // Humain
+    if (O[9]) {
+      int b,a = b = random(0, 46);
+      while (a == 3 || b ==3 || a == b) {
+         a = random(0, 46);
+         b = random(0, 46);
+      }
+      comp[a] = 1;
+      // Aleatoire sauf Appel du sauvage
+       comp[b] = 1;
+      // Pareil
+    }
+   else // Ogre
+    if (O[10]) {
+      comp[4] =1;
+      // Appel du tonneau
+       comp[5] =1;
+      // Appel du ventre
+       comp[6] =1;
+      // Armes de bourrin
+       comp[24] =1;
+      // Instinct de survie
+       comp[26] =1;
+      // Intimider
+       comp[40] =1;
+      // Sentir des pieds
+       comp[42] =1;
+      // Tête vide
+       comp[9] =2;
+      /* Bourre-pif */
+       comp[12] =2;
+      // Chercher des noises
+       comp[23] =2;
+      // Fouiller dans les poubelles
+       comp[28] =2;
+      // Langues des monstres
+       comp[45] =2;
+      // Truc de mauviette
+    }
+   else // Orque
+    if (O[11]) {
+      comp[1] =1;
+      // Agoraphobie
+       comp[3] =1;
+      // Appel du sauvage
+       comp[4] =1;
+      // Appel du tonneau
+       comp[9] =1;
+      /* Bourre-pif */
+       comp[24] =1;
+      // Instinc de survie
+       comp[40] =1;
+      // Sentir des pieds
+       comp[42] =1;
+      // Tête vide
+       comp[6] =2;
+      // Armes de bourrin
+       comp[12] =2;
+      // Chercher des noises
+       comp[23] =2;
+      // Fouiller dans les poubelles
+       comp[26] =2;
+      // Intimider
+       comp[45] =2;
+      // Truc de mauviette
+    }
+   else // Nain
+    if (O[12]) {
+      comp[4] =1;
+      // Appel du tonneau
+       comp[25] =1;
+      // Instinct du trésor
+       comp[33] =1;
+      // Pénible
+       comp[36] =1;
+      // Radin
+       comp[2] =2;
+      // Appel des renforts
+       comp[7] =2;
+      // Arnaque et carambouille
+       comp[9] =2;
+      /* Bourre-pif */
+       comp[10] =2;
+      // Bricolo du dimanche
+       comp[12] =2;
+      // Chercher des noises
+       comp[14] =2;
+      // Chouraver
+       comp[20] =2;
+      // Forgeron
+       comp[22] =2;
+      // Faribole
+       comp[29] =2;
+      // Méfiance
+       comp[45] =2;
+      // Truc de mauviette
+    }
+   /* --------------------------- Compétence métier --------------------------- */
+    // Bourgeois ou Noble
+    if (M[0]) {
+      comp[2] =1;
+      // Appel des renforts
+       comp[8] =1;
+      // Attire les monstres
+       comp[13] =1;
+      // Chevaucher
+       comp[33] =1;
+      // Pénible
+       if (comp[7] !=1) comp[7] =2;
+      // Arnaque et carambouille
+       if (comp[27] !=1) comp[27] =2;
+      // Jonglage et danse
+       if (comp[29] !=1) comp[29] =2;
+      // Méfiance
+       if (comp[31] !=1) comp[31] =2;
+      // Nager
+       if (comp[39] !=1) comp[39] =2;
+      // Runes bizarres
+    }
+   else // Guerrier ou Gladiateur
+    if (M[1]) {
+      if ( ! O[0]) EV +=5;
+      if (readBoolean("Echanger 1 point d'attaque avec un point de parade ?")) {
+         AT --;
+         PRD ++;
+      } else if (readBoolean("Echanger 1 point de parade avec un point d'attaque ?")) {
+         PRD --;
+         AT ++;
+      }
+      comp[6] =1;
+      // Armes de bourrin
+       comp[9] =1;
+      /* Bourre-pif */
+       if (comp[0] !=1) comp[0] =2;
+      // Ambidextrie
+       if (comp[12] !=1) comp[12] =2;
+      // Chercher des noises
+       if (comp[13] !=1) comp[13] =2;
+      // Chevaucher
+       if (comp[20] !=1) comp[20] =2;
+      // Forgeron
+       if (comp[26] !=1) comp[26] =2;
+      // Intimider
+       if (comp[43] !=1) comp[43] =2;
+      // Tirer correctement
+       if (comp[45] !=1) comp[45] =2;
+      // Truc de mauviette
+    }
+   else // Ingénieur
+    if (M[2]) {
+      if (readBoolean("Retirer un point à l'attaque(oui) ou à la parade(non) ? (Obligatoire)")) {
+         AT --;
+      } else {
+         PRD --;
+      }
+      if (readBoolean("L'ajouter à l'intelligence(oui) ou à l'adress(non) ? (Obligatoire)")) {
+         INT ++;
+      } else {
+         AD ++;
+      }
+      comp[10] =1;
+      // Bricolo du dimanche
+       comp[18] =1;
+      // Désamorcer
+       comp[20] =1;
+      // Forgeron
+       comp[38] =1;
+      // Ressemble à rien
+       comp[41] =1;
+      // Sérrurier
+       if (comp[2] !=1) comp[2] =2;
+      // Appel des renforts
+       if (comp[13] !=1) comp[13] =2;
+      // Chevaucher
+       if (comp[16] !=1) comp[16] =2;
+      // Cuistot
+       if (comp[31] !=1) comp[31] =2;
+      // Nager
+       if (comp[35] !=1) comp[35] =2;
+      // Premiers soins
+    }
+   else // Mage
+    if (M[3]) {
+      comp[37] =1;
+      // Récupération
+       comp[39] =1;
+      //Runes bizarres
+       if (comp[2] !=1) comp[2] =2;
+      // Appel des renforts
+       if (comp[13] !=1) comp[13] =2;
+      // Chevaucher
+       if (comp[22] !=1) comp[22] =2;
+      // Fariboles
+       if (comp[28] !=1) comp[28] =2;
+      // Langues des monstres
+       if (comp[35] !=1) comp[35] =2;
+      // Premiers soins
+    }
+   else // Marchant ou Négociant
+    if (M[4]) {
+      if (readBoolean("Retirer un point à l'attaque(oui) ou à la parade(non) ? (Obligatoire)")) {
+         AT --;
+      } else {
+         PRD --;
+      }
+      if (readBoolean("L'ajouter à l'intéligence(oui) ou au charisme(non) ? (Obligatoire)")) {
+         INT ++;
+      } else {
+         CHA ++;
+      }
+      comp[2] =1;
+      // Appel des renforts
+       comp[7] =1;
+      // Arnaque et carambouille
+       comp[22] =1;
+      // Faribole
+       comp[29] =1;
+      // Méfiance
+       comp[39] =1;
+      // Runes bizarres
+       if (comp[13] !=1) comp[13] =2;
+      // Chevaucher
+       if (comp[16] !=1) comp[16] =2;
+      // Cuistot
+       if (comp[20] !=1) comp[20] =2;
+      // Forgeron
+       if (comp[25] !=1) comp[25] =2;
+      // Instinct du trésor
+    }
+   else // Menestrel
+    if (M[5]) {
+      comp[8] =1;
+      // Attire les monstres
+       comp[13] =1;
+      // Chevaucher
+       comp[22] =1;
+      // Faribole
+       comp[27] =1;
+      // Jonglage et danse
+       comp[32] =1;
+      // Naïveté touchante
+       if (comp[29] !=1) comp[29] =2;
+      // Méfiance
+       if (comp[30] !=1) comp[30] =2;
+      // Mendier et pleurnicher
+       if (comp[35] !=1) comp[35] =2;
+      // Premiers soins
+       if (comp[39] !=1) comp[39] =2;
+      // Runes bizarres
+       if (comp[43] !=1) comp[43] =2;
+      // Tirer correctement
+    }
+   else // Ninja ou Assassin
+    if (M[6]) {
+      comp[17] =1;
+      // Déplacement silencieux
+       comp[21] =1;
+      // Frapper lachement
+       comp[43] =1;
+      // Tirer correctement
+       if (comp[0] !=1) comp[0] =2;
+      // Ambidextrie
+       if (comp[12] !=1) comp[12] =2;
+      // Chercher des noises
+       if (comp[13] !=1) comp[13] =2;
+      // Chevaucher
+       if (comp[19] !=1) comp[19] =2;
+      // Escalader
+       if (comp[23] !=1) comp[23] =2;
+      // Fouiller dans les poubelles
+       if (comp[29] !=1) comp[29] =2;
+      // Méfiance
+       if (comp[31] !=1) comp[31] =2;
+      // Nager
+       if (comp[38] !=1) comp[38] =2;
+      // Ressemble à rien
+    }
+   else // Paladin
+    if (M[7]) {
+      comp[13] =1;
+      // Chevaucher
+       comp[37] =1;
+      // Récupération
+       if (comp[6] !=1) comp[6] =2;
+      // Armes de bourrin
+       if (comp[12] !=1) comp[0] =2;
+      // Chercher des noises
+       if (comp[22] !=1) comp[22] =2;
+      // Faribole
+       if (comp[26] !=1) comp[26] =2;
+      // Intimider
+       if (comp[35] !=1) comp[35] =2;
+      // Premiers soins
+    }
+   else // Pirate
+    if (M[8]) {
+      comp[2] =1;
+      // Appel des renforts
+       comp[4] =1;
+      // Appel du tonneau
+       comp[7] =1;
+      // Arnaque et carambouille
+       comp[14] =1;
+      // Chouraver
+       comp[19] =1;
+      // Escalader
+       comp[31] =1;
+      // Nager
+       if (comp[23] !=1) comp[23] =2;
+      // Fouiller dans les poubelles
+       if (comp[25] !=1) comp[25] =2;
+      // Instinct du trésor
+       if (comp[29] !=1) comp[29] =2;
+      // Méfiance
+       if (comp[30] !=1) comp[30] =2;
+      // Mendier et pleurnicher
+       if (comp[43] !=1) comp[43] =2;
+      // Tirer correctement
+    }
+   else // Prêtre
+    if (M[9]) {
+      comp[29] =1;
+      // Méfiance
+       comp[37] =1;
+      // Récupération
+       if (comp[7] !=1) comp[7] =2;
+      // Arnaque et carambouille
+       if (comp[13] !=1) comp[13] =2;
+      // Chevaucher
+       if (comp[16] !=1) comp[16] =2;
+      // Cuistot
+       if (comp[22] !=1) comp[22] =2;
+      // Faribole
+       if (comp[35] !=1) comp[35] =2;
+      // Premiers soins
+       if (comp[36] !=1) comp[36] =2;
+      // Radin
+       if (comp[39] !=1) comp[39] =2;
+      // Runes bizarres
+    }
+   else // Ranger
+    if (M[10]) {
+      if (readBoolean("Changer une caractéristique ?")) {
+         String s;
+         do{
+            s = readString("Soustraire 1 à laquelle ? (COU,INT,CHA,AD,FO) 0 pour annuler");
+         }
+         while ( ! (equal(s, "COU") || equal(s, "cou") || equal(s, "Cou") || equal(s, "INT") || equal(s, "int") || equal(s, "Int") || equal(s, "CHA") || equal(s, "cha") || equal(s, "Cha") || equal(s, "AD") || equal(s, "ad") || equal(s, "Ad") || equal(s, "FO") || equal(s, "fo") || equal(s, "Fo") || equal(s, "0")));
+         if ( ! equal(s, "0")) {
+            String t;
+            do{
+               t = readString("Ajouter 1 à laquelle ? (COU,INT,CHA,AD,FO) 0 pour annuler");
+            }
+            while ( ! (equal(t, "COU") || equal(t, "cou") || equal(t, "Cou") || equal(t, "INT") || equal(t, "int") || equal(t, "Int") || equal(t, "CHA") || equal(t, "cha") || equal(t, "Cha") || equal(t, "AD") || equal(t, "ad") || equal(t, "Ad") || equal(t, "FO") || equal(t, "fo") || equal(t, "Fo") || equal(t, "0")));
+            if ( ! equal(t, "0")) {
+               if (equal(s, "COU") || equal(s, "cou") || equal(s, "Cou")) COU --;
+               if (equal(s, "INT") || equal(s, "int") || equal(s, "Int")) INT --;
+               if (equal(s, "CHA") || equal(s, "cha") || equal(s, "Cha")) CHA --;
+               if (equal(s, "AD") || equal(s, "ad") || equal(s, "Ad")) AD --;
+               if (equal(s, "FO") || equal(s, "fo") || equal(s, "Fo")) FO --;
+               if (equal(t, "COU") || equal(t, "cou") || equal(t, "Cou")) COU ++;
+               if (equal(t, "INT") || equal(t, "int") || equal(t, "Int")) INT ++;
+               if (equal(t, "CHA") || equal(t, "cha") || equal(t, "Cha")) CHA ++;
+               if (equal(t, "AD") || equal(t, "ad") || equal(t, "Ad")) AD ++;
+               if (equal(t, "FO") || equal(t, "fo") || equal(t, "Fo")) FO ++;
+            }
+         }
+      }
+      comp[13] =1;
+      // Chevaucher
+       comp[17] =1;
+      // Déplacement silencieux
+       comp[31] =1;
+      // Nager
+       comp[34] =1;
+      // Pister
+       if (comp[0] !=1) comp[0] =2;
+      // Ambidextrie
+       if (comp[10] !=1) comp[10] =2;
+      // Bricolo du dimanche
+       if (comp[15] !=1) comp[15] =2;
+      // Comprendre les annimaux
+       if (comp[18] !=1) comp[18] =2;
+      // Désamorcer
+       if (comp[19] !=1) comp[19] =2;
+      // Escalader
+       if (comp[29] !=1) comp[29] =2;
+      // Méfiance
+       if (comp[35] !=1) comp[35] =2;
+      // Premiers soins
+       if (comp[43] !=1) comp[43] =2;
+      // Tirer correctement
+    }
+   else // Tzinntch
+    if (M[11]) {
+      comp[13] =1;
+      // Chevaucher
+       comp[37] =1;
+      // Récupération
+       if (comp[6] !=1) comp[6] =2;
+      // Armes de bourrin
+       if (comp[12] !=1) comp[0] =2;
+      // Chercher des noises
+       if (comp[22] !=1) comp[22] =2;
+      // Faribole
+       if (comp[26] !=1) comp[26] =2;
+      // Intimider
+       if (comp[35] !=1) comp[35] =2;
+      // Premiers soins
+    }
+   else // Voleur
+    if (M[12]) {
+      comp[2] =1;
+      // Appel des renforts
+       comp[14] =1;
+      // Chouraver
+       comp[17] =1;
+      // Déplacement silencieux
+       comp[41] =1;
+      // Sérrurier
+       if (comp[7] !=1) comp[7] =2;
+      // Arnaque et carambouille
+       if (comp[18] !=1) comp[18] =2;
+      // Désamorcer
+       if (comp[19] !=1) comp[19] =2;
+      // Escalader
+       if (comp[21] !=1) comp[21] =2;
+      // Frapper lachement
+       if (comp[23] !=1) comp[23] =2;
+      // Fouiller dans les poubelles
+       if (comp[29] !=1) comp[29] =2;
+      // Méfiance
+       if (comp[38] !=1) comp[38] =2;
+      // Ressemble à rien
+    }
+}
+
+void carac(boolean d) {
+   COU = de(6, d) +7;
+   INT = de(6, d) +7;
+   CHA = de(6, d) +7;
+   AD = de(6, d) +7;
+   FO = de(6, d) +7;
+   PdD = de(4, d) -1;
+   or = (de(6, d) + de(6, d)) *10;
+   magPhy = (INT + AD) /2;
+   magPsy = (INT + CHA) /2;
+   resMag = (INT + COU + FO) /3;
+}
+
+void creationPerso(boolean d) {
+   String o, m;
+   EA =0;
+   AT =8;
+   PRD =10;
+   carac(d);
+   origine();
+   metier();
+   print("COU : " + COU + ", INT : " + INT + ", CHA : " + CHA + ", AD : " + AD + ", FO : " + FO + "\n");
+   print("Origine :\n");
+   for (int a =0; a < nbMet; a ++) if (O[a]) print((a +1) + ")\t" + ori[a] + "\n");
+   o = ChoixO(d);
+   print("-----------------------------\n");
+   print("Métier :\n");
+   for (int a =0; a < nbMet; a ++) if (M[a]) print((a +1) + ")\t" + met[a] + "\n");
+   m = ChoixM(d);
+   print("Vous avez choisi : " + o + " - " + m);
+   sleep(1000);
+   clear();
+   // Si le choix du métier et/ou de l'origine ont une influance sur les caractéristiques
+    if ((AD <=8) || ((AD >=13) && ! M[6]) || M[1] || M[10] || M[2] || M[4]) {
+      print("COU : " + COU + ", INT : " + INT + ", CHA : " + CHA + ", AD : " + AD + ", FO : " + FO + "\n");
+      for (int x =0; x < nbMet; x ++) if (O[x]) print(ori[x] + " - ");
+      for (int x =0; x < nbMet; x ++) if (M[x]) print(met[x] + "\n");
+      print("Attaque : " + AT + " - Parade : " + PRD + "\n");
+      competence();
+      clear();
+      print("COU : " + COU + ", INT : " + INT + ", CHA : " + CHA + ", AD : " + AD + ", FO : " + FO + "\n");
+      for (int x =0; x < nbMet; x ++) if (O[x]) print(ori[x] + " - ");
+      for (int x =0; x < nbMet; x ++) if (M[x]) print(met[x] + "\n");
+      print("Attaque : " + AT + " - Parade : " + PRD + "\n");
+      if (AD <=8) {
+         if (readBoolean("AD <= 8 : -1 à l'attaque(oui) ou -1 à la parade(non) ?"))AT --;
+         else PRD --;
+      }
+      if ((AD >=13) && ! M[6]) {
+         if (readBoolean("AD >= 13 : +1 à l'attaque(oui) ou +1 à la parade(non) ?"))AT ++;
+         else PRD ++;
+      }
+      clear();
+   } else {
+      //Sinon !
+       print("COU : " + COU + ", INT : " + INT + ", CHA : " + CHA + ", AD : " + AD + ", FO : " + FO + "\n");
+      for (int x =0; x < nbMet; x ++) if (O[x]) print(ori[x] + " - ");
+      for (int x =0; x < nbMet; x ++) if (M[x]) print(met[x] + "\n");
+      print("Attaque : " + AT + " - Parade : " + PRD + "\n");
+      competence();
+      clear();
+   }
+   print("COU : " + COU + ", INT : " + INT + ", CHA : " + CHA + ", AD : " + AD + ", FO : " + FO + "\n");
+   for (int x =0; x < nbMet; x ++) if (O[x]) print(ori[x] + " - ");
+   for (int x =0; x < nbMet; x ++) if (M[x]) print(met[x] + " - ");
+   print("Or : " + or + "\n");
+   print("Attaque : " + AT + " - Parade : " + PRD + " - Energie vitale : " + EV);
+   if (EA !=0)print(" - Energie astral : " + EA + "\n");
+   else print("\n");
+   if (M[9] || M[3]) print("magie physique : " + magPhy + ", magie psychique : " + magPsy + ", ");
+   print("résistance magique : " + resMag + "\n");
+   if (PdD > 1) print(PdD + " points de destin\n");
+   else print(PdD + " point de destin\n");
+   print("\n");
+   print("Compétence : \n");
+   for (int i =0; i <46; i ++) if (comp[i] ==1) print("\tx\t" + compS[i] + "\n");
+   print("----------------------------------------------\n");
+   for (int i =0; i <46; i ++) if (comp[i] ==2) print("\to\t" + compS[i] + "\n");
+}
+
+void avant() {
+   /*Barbare*/
+    if (O[0]) print("Le Barbare a une endurance très élevée. Il n'aime pas tout ce qui est compliqué. Il résiste au froid, au chaud, à la douleur.\n");
+   else/*Demi-Elfe*/
+    if (O[1]) print("Excellente vue, non nyctalope.");
+   else /*Demi-Orque*/
+    if (O[2]) print("Très bon odorat : peut flairer le sang ou le danger à 25m. Nyctalopie moyenne.\n");
+   else /*Elfe Sylvain*/
+    if (O[4]) {
+      print("Peut utiliser n’importe quelle forme de magie sur parchemin ou enchantement.\n");
+      print("Excellente vue, bon odorat, nyctalopie totale.\n");
+   }
+   else /*Gnôme*/
+    if (O[5]) {
+      print("Tous les vêtements/protections sont 50% plus chers (sur mesure). La plupart des armes sont trop lourdes. Le gnôme est\n");
+      print("contorsionniste, et roi de l'esquive. De part sa petite taille, il peut chevaucher n'importe quoi.\n");
+   }
+   else/*Gobelin*/
+    if (O[6]) {
+      print("Les armes longues à 1 main sont pour le gobelin des armes à 2 mains. Il ne peut utiliser à 1 main que les armes courtes\n");
+      print("comme les dagues ou des gourdins qu'il se fabrique. Tous les vêtements/protections sont 20% plus chers.\n");
+      print("Excellent odorat : peut flairer le sang ou le danger à 50m. Bonne vue, nyctalopie totale.\n");
+   }
+   else/*Haut Elfe*/
+    if (O[7]) print("Excellente vue, nyctalopie moyenne. Ouïe plus développée que la moyenne.\n");
+   else /*Hobbit*/
+    if (O[8]) {
+      print("Les armes longues à 1 main sont pour le semi-homme des armes à 2 mains. Il ne peut utiliser à 1 main que les armes\n");
+      print("courtes comme les dagues ou des gourdins qu'il se fabrique. Tous les vêtements/protections sont 20% plus chers.\n");
+   }
+   else /*Humain*/
+    if (O[9]) {
+      print("L'humain de base peut utiliser n’importe quelle forme de magie sur parchemin, objet ou enchantement.\n");
+      print("Il peut également choisir n'importe quelle profession.\n");
+   }
+   else /* Ogre*/
+    if (O[10]) print("Très bon odorat : peut flairer le sang ou le danger à 50m. Tous les vêtements/protections sont 30% plus chers.\n");
+   else/* Orque*/
+    if (O[11]) print("Excellent odorat : peut flairer le sang ou le danger à 50m. Mauvaise vue, mais nyctalopie totale.\n");
+   else /*Nain*/
+    if (O[12]) {
+      print("Les Nains ont les bras plus courts que les humains et que les autres créatures et n'ont pas le même sens de l'équilibre, ni le\n");
+      print("même centre de gravité. Cela leur pose des problèmes pour ce qui concerne l'utilisation d'un certain nombre d'armes. On\n");
+      print("considère donc que les armes à 1 main des humains sont des armes à 2 mains pour les Nains (ils ont donc +1 aux dégâts) et\n");
+      print("qu'ils ne peuvent pas manier les vraies armes à 2 mains. Les Nains eux-mêmes fabriquent des armes spécialement\n");
+      print("étudiées (haches et marteaux d'artisan Nain, ou Durandil) qu'ils peuvent manier à 1 main (ils peuvent ainsi en prendre\n");
+      print("une dans chaque main, ou utiliser un bouclier avec). En conséquence, la compétence \"armes de bourrins\" ne sert à rien pour\n");
+      print("les Nains.\n");
+   }
+   else /*Guerrier ou Gladiateur*/
+    if (M[1]) print("Peut s'équiper de protections importantes dès le niveau 1.\n");
+   else /*Mage*/
+    if (M[3]) {
+      print("Aptitudes à la magie : peut lancer tous les sortilèges. Peut choisir une spécialité magique ou une affiliation à un dieu ou\n");
+      print("démon. Peut faire une cure (payante) pour gagner des points astraux. Peut utiliser un bâton magique. Peut pratiquer des\n");
+      print("invocations ou enchanter des objets.\n");
+   }
+   else /*Prêtre*/
+    if (M[9]) {
+      print("Le prêtre reçoit les restrictions et avantages relatifs au dieu choisi.\n");
+      print("Peut faire appel aux prodiges des dieux. Peut choisir une affiliation à un dieu ou démon. Peut faire une cure (payante) pour\n");
+      print("gagner des points astraux.\n");
+   }
+   if (M[11]) {
+      print("Tzinntch est le dieu-démon mystique de la sorcellerie. C'est une entité sombre et cruelle, entièrement vouée à la puissance.\n");
+      print("Alors quand on s'inscrit, on sait déjà que les autres gens ne vont pas nous aimer\n");
+   }
+}
+
+void initRest(boolean [] RestB, String [] RestS, int u) {
+   for (int i =0; i < u; i ++) {
+      RestB[i] = false;
+      RestS[i] = null;
+   }
+   RestS[0] = "\t> n’utilise pas la magie sauf sur arme enchantée\n";
+   RestS[1] = "\t> n’utilise pas d’arbalète\n";
+   RestS[2] = "\t> n’utilise pas d’armure complète ou d'armure enchantée\n";
+   RestS[3] = "\t> n’utilise pas de bouclier\n";
+   RestS[4] = "\t> ne peut pas utiliser les armes à 2 mains\n";
+   RestS[5] = "\t> transport de charge limitée à 15 kilos\n";
+   RestS[6] = "\t> n’utilise pas d’armure supérieure à PR5 (sauf magique)\n";
+   RestS[7] = "\t> n’utilise pas la magie sauf sur arme ou protection enchantée\n";
+   RestS[8] = "\t> n’utilise pas d’arbalète ou d'armes complexes\n";
+   RestS[9] = "\t> n’utilise pas d’armure complète\n";
+   RestS[10] = "\t> n’utilise pas d’armure supérieure à PR3 (sauf magique)\n";
+   RestS[11] = "\t> pas d’aptitudes à la magie\n";
+   RestS[12] = "\t> transport de charge limitée à 10 kilos\n";
+   RestS[13] = "\t> n’utilise pas d’armure supérieure à PR4 (sauf magique)\n";
+   RestS[14] = "\t> armes autorisées : poignards, dagues, couteaux\n";
+   RestS[15] = "\t> transport de charge limitée à 2 kilos\n";
+   RestS[16] = "\t> n’utilise pas d’armure supérieure à PR2 (sauf magique)\n";
+   RestS[17] = "\t> n’utilise aucune forme de magie\n";
+   RestS[18] = "\t> ne parle pas la langue\n";
+   RestS[19] = "\t> n’utilise pas d’arc ni d’arme à 2 mains\n";
+   RestS[20] = "\t> n’utilise pas d’armes compliquées à manier\n";
+   RestS[21] = "\t> n’utilise pas d’arc ou arbalète\n";
+   RestS[22] = "\t> n’utilise pas d’armure supérieure à PR2\n";
+   RestS[23] = "\t> n’utilise pas les armes à 2 mains “humaines”\n";
+   RestS[24] = "\t> aucune restriction particulière, car le noble pense qu'il peut tout faire – ce qui est faux bien sûr\n";
+   RestS[25] = "\t> non, le noble ne peut choisir aucun autre métier que noble, même à haut niveau !\n";
+   RestS[26] = "\t> ne peut utiliser autre chose que : bâton, poignard, dague, gourdin comme arme de combat rapproché\n";
+   RestS[27] = "\t> n'utilise pas de bouclier ni d'arbalète\n";
+   RestS[28] = "\t> liées au dieu auquel le paladin a voué son âme (voir fiches descriptive pour chaque dieu)\n";
+   RestS[29] = "\t> doit posséder une relique du dieu en question pour utiliser ses pouvoirs (sinon, il ne sera qu'un aspirant paladin)\n";
+   RestS[30] = "\t> un pirate reste un pirate : il ne peut changer de métier\n";
+   RestS[31] = "\t> doit utiliser les armes et protections autorisées par le dieu ou démon affilié\n";
+   RestS[32] = "\t> doit se plier aux règles de vie relatives au dieu ou démon affilié\n";
+   RestS[33] = "\t> n’utilise pas d’armure supérieure à PR4 (sauf magique ou “spécial voleur/ranger”)\n";
+   RestS[34] = "\t> le mage ne peut choisir aucune autre spécialisation que celle de Tzinntch\n";
+   RestS[35] = "\t> le mage doit préserver 50% de ses gains en or, nature et joyaux pour les donner au culte\n";
+   RestS[36] = "\t> le mage commence sa carrière avec -5 points d'EV et -2 en FO sur ses compétences d'origine\n";
+   RestS[37] = "\t> le mage gagne 1D6-1 en EV au changement de niveau s'il choisit d'augmenter l'EV (minimum 1)\n";
+   RestS[38] = "\t> le mage doit obligatoirement porter la robe noire de l'ordre – il peut porter quelque chose en-dessous, coquins\n";
+   RestS[39] = "Points positifs :\n";
+   RestS[40] = "\t> le mage a accès à tous les sorts “accessibles à tous”, à 1 niveau au-dessus du sien (sauf magie de Tzinntch...)\n";
+   RestS[41] = "\t> le mage commence sa carrière avec +5 PA\n";
+   RestS[42] = "\t> le mage dépense 1 PA de moins pour chaque sort “accessible à tous” (minimum 1)\n";
+   RestS[43] = "\t> le mage a accès aux sortilèges inédits réservés aux cultistes de Tzinntch\n";
+}
+
+void affRest(boolean [] RestB, String [] RestS, int u) {
+   print("\nRestrictions :\n");
+   for (int i =0; i < u; i ++) {
+      if (RestB[i]) print(RestS[i]);
+   }
+}
+
+void restriction(boolean [] RestB, String [] RestS, int u) {
+   /*Barbare*/
+    if (O[0]) {
+      RestB[0] = true;
+      RestB[1] = true;
+      RestB[2] = true;
+      RestB[3] = true;
+   }
+   else/*Demi-Elfe*/
+    if (O[1]) {
+      RestB[4] = true;
+      RestB[5] = true;
+      RestB[6] = true;
+   }
+   else /*Demi-Orque*/
+    if (O[2]) {
+      RestB[7] = true;
+      RestB[8] = true;
+      RestB[9] = true;
+   }
+   else /*Elfe Noir*/
+    if (O[3]) {
+      RestB[4] = true;
+      RestB[3] = true;
+      RestB[5] = true;
+      RestB[10] = true;
+   }
+   else /*Elfe Sylvain*/
+    if (O[4]) {
+      RestB[11] = true;
+      RestB[4] = true;
+      RestB[12] = true;
+      RestB[13] = true;
+   }
+   else /*Gnôme*/
+    if (O[5]) {
+      RestB[7] = true;
+      RestB[14] = true;
+      RestB[15] = true;
+      RestB[16] = true;
+   }
+   else/*Gobelin*/
+    if (O[6]) {
+      RestB[17] = true;
+      RestB[18] = true;
+      RestB[12] = true;
+   }
+   else/*Haut Elfe*/
+    if (O[7]) {
+      RestB[4] = true;
+      RestB[12] = true;
+      RestB[13] = true;
+   }
+   else /*Hobbit*/
+    if (O[8]) {
+      RestB[7] = true;
+      RestB[19] = true;
+      RestB[9] = true;
+      RestB[10] = true;
+   }
+   else /* Ogre*/
+    if (O[10]) {
+      RestB[20] = true;
+      RestB[17] = true;
+      RestB[21] = true;
+      RestB[22] = true;
+   }
+   else/* Orque*/
+    if (O[11]) {
+      RestB[8] = true;
+      RestB[17] = true;
+   }
+   else /*Nain*/
+    if (O[12]) {
+      RestB[7] = true;
+      RestB[21] = true;
+      RestB[23] = true;
+   }
+   /*Bouregois ou Noble*/
+    if (M[0]) {
+      RestB[24] = true;
+     ;
+      RestB[25] = true;
+   }
+   else /*Guerrier ou Gladiateur*/
+    if (M[1]) RestB[7] = true;
+   else /*Ingénieur*/
+    if (M[2]) {
+      RestB[10] = true;
+      RestB[4] = true;
+   }
+   else /*Mage*/
+    if (M[3]) {
+      RestB[26] = true;
+      RestB[21] = true;
+      RestB[3] = true;
+      RestB[12] = true;
+      RestB[16] = true;
+   }
+   else /*Marchand ou Négociant*/
+    if (M[4]) {
+      RestB[10] = true;
+      RestB[4] = true;
+   }
+   else /*Menestrel*/
+    if (M[5]) {
+      RestB[16] = true;
+      RestB[26] = true;
+      RestB[27] = true;
+   }
+   else /*Ninja ou Assassin*/
+    if (M[6]) RestB[10] = true;
+   else /*Paladin*/
+    if (M[7]) {
+      RestB[28] = true;
+      RestB[29] = true;
+   }
+   else /*Pirate*/
+    if (M[8]) {
+      RestB[10] = true;
+      RestB[30] = true;
+     ;
+      RestB[4] = true;
+   }
+   else /*Prêtre*/
+    if (M[9]) {
+      RestB[31] = true;
+      RestB[32] = true;
+   }
+   else /*Ranger*/
+    if (M[10]) RestB[33] = true;
+   else /*Tzinntch*/
+    if (M[11]) {
+      RestB[34] = true;
+      RestB[35] = true;
+      RestB[36] = true;
+      RestB[37] = true;
+      RestB[38] = true;
+      RestB[39] = true;
+      RestB[40] = true;
+      RestB[41] = true;
+      RestB[42] = true;
+      RestB[43] = true;
+   }
+   else /*Voleur*/
+    if (M[12]) RestB[10] = true;
+   affRest(RestB, RestS, u);
+}
+
+void apres() {
+   /*Elfe Sylvain*/
+    if (O[4]) {
+      print("+1 CHA par niveau jusqu’au niveau 3 inclus (en plus de l'augmentation standard)\n");
+   }
+   else /*Gnôme*/
+    if (O[5]) {
+      print("EV +1D4 par niveau\n");
+      print("il peut esquiver les coups de manière permanente sans rater aucun assaut\n");
+   }
+   else/*Gobelin*/
+    if (O[6]) {
+      print("le gobelin sait éviter les coups, le malus de PARADE relatif  au matériel ne s'applique jamais\n");
+   }
+   else/*Haut Elfe*/
+    if (O[7]) {
+      print("+1 CHA par niveau jusqu’au niveau 3 inclus (en plus de l'augmentation standard)\n");
+   }
+   else /*Hobbit*/
+    if (O[8]) {
+      print("EV +1D4 par niveau\n");
+   }
+   else /* Ogre*/
+    if (O[10]) {
+      print("l'ogre est bourrin\n");
+   }
+   else/* Orque*/
+    if (O[11]) {
+      print("l'orque est bourrin\n");
+   }
+   /*Bouregois ou Noble*/
+    if (M[0]) {
+      print("également une « maison de ville moyenne » (à situer sur la carte dans une ville) ainsi qu'un cheval.\n");
+   }
+   else /*Ingénieur*/
+    if (M[2]) {
+      print("Au niveau 1, l'ingénieur commence toujours sa carrière avec un marteau, une scie, un tournevis et 20 m de ficelle\n");
+   }
+   else /*Mage*/
+    if (M[3]) {
+      print("Au passage de niveau, choisit d'augmenter l'énergie vitale OU l'énergie astrale (ID6)\n");
+   }
+   else /*Marchand ou Négociant*/
+    if (M[4]) {
+      print("Au niveau 1, le marchand possède une charrette, un cheval et une « maison en village paumé » (à situer sur la carte)\n");
+   }
+   else /*Ninja ou Assassin*/
+    if (M[6]) {
+      print("L'assassin est bien meilleur à l'attaque qu'à la parade\n");
+   }
+   else /*Paladin*/
+    if (M[7]) {
+      print("Au passage de niveau, choisit d'augmenter l'énergie vitale (1D6) OU l'énergie astrale karmique (ID4)\n");
+   }
+   else /*Prêtre*/
+    if (M[9]) {
+      print("Au passage de niveau, choisit d'augmenter l'énergie vitale OU l'énergie astrale karmique (ID6)\n");
+   }
+   else /*Paladin*/
+    if (M[10]) {
+      print("Au passage de niveau, choisit d'augmenter l'énergie vitale (1D6) OU l'énergie astrale karmique (ID4)\n");
+   }
+}
+
+// --------------------------------------------- MAIN --------------------------------------------- //
+ void main() {
+   clear();
+   maj();
+   clear();
+   initOrigineMetier();
+   initComp();
+   /*Changer u !*/
+    int u = 44;
+   boolean [] RestB = new boolean [u];
+   String [] RestS = new String [u];
+   initRest(RestB, RestS, u);
+   do{
+      clear();
+      boolean d = readBoolean("Voulez-vous lancer de vrai dés ?");
+      creationPerso(d);
+      print("\n   Info sur votre personnage :\n\n");
+      avant();
+      restriction(RestB, RestS, u);
+      apres();
+      print("\nAvant de continuer vous devez sauvegarder ce personnage car la console sera effacée.\n");
+      print("Pour cela il faut imprimer les fiches perso disponible sur le site du Donjon de naheulbeuk,\n");
+      print("et la remplir (lien du site internet : http://www.naheulbeuk.com/)\n");
+   }
+   while (readBoolean("Voulez-vous créer un autre perso ? (la console va être effacée)"));
+   print("\n\tBonne partie !\n");
+}
+
